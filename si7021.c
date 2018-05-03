@@ -64,13 +64,12 @@ static devclass_t si7021_devclass;
 
 DRIVER_MODULE(si7021, iicbus, si7021_driver, si7021_devclass, 0, 0); // copied from another one
 
-static int si7021_read(device_t dev, uint32_t addr, uint8_t reg, uint8_t *data, size_t len) {
+static int si7021_read(device_t dev, uint32_t addr, uint8_t *data, size_t len) {
 	struct iic_msg msg[2] = {
-		{ addr, IIC_M_WR, 1, &reg },
 		{ addr, IIC_M_RD, len, data },
 	};
 
-	if (iicbus_transfer(dev, msg, 2) != 0) {
+	if (iicbus_transfer(dev, msg, 1) != 0) {
 		return -1;
 	}
 	return 0;
@@ -190,7 +189,7 @@ static int si7021_humidity_sysctl(SYSCTL_HANDLER_ARGS) {
 		device_printf(dev, "couldnt write to device\n");
 	}
 	
-	if (si7021_read(sc->sc_dev, sc->sc_addr, SI_RH_NOMM, buffer_rx, 2*sizeof(uint8_t)) != 0) {
+	if (si7021_read(sc->sc_dev, sc->sc_addr, buffer_rx, 2*sizeof(uint8_t)) != 0) {
 		device_printf("couldnt read from device\n");
 	}
 
