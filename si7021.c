@@ -149,8 +149,8 @@ static void si7021_start(void *xdev) {
 			CTLTYPE_INT | CTLFLAG_RD | CTLFLAG_MPSAFE, dev, 34,
 			si7021_humidity_sysctl, "I", "Current relative humidity");
 	// now we're getting calibration parameters
-	uint8_t reg;
-	uint8_t buffer_rx[2];
+	// uint8_t reg;
+	// uint8_t buffer_rx[2];
 	// device_printf(dev, "started si7021\n");
 }
 
@@ -183,6 +183,23 @@ static int si7021_humidity_sysctl(SYSCTL_HANDLER_ARGS) {
 	int humidity = 0;
 
 	// to be written
+	uint8_t buffer_tx[2];
+	uint8_t buffer_rx[2];
+	buffer_tx = {SI_RH_NOMM, 0};
+	if (si7021_write(sc->sc_dev, sc->sc_addr, buffer_tx, 2) != 0) {
+		device_printf(dev, "couldnt write to device\n");
+	}
+	
+	if (si7021_read(sc->sc_dev, sc->sc_addr, SI_RH_NOMM, buffer_rx, 2*sizeof(uint8_t)) != 0) {
+		device_printf("couldnt read from device\n");
+	}
+
+	humidity = buffer_rx[0]*256 + buffer_rx[1];
+
+	humidity *= 125;
+	humidity /= 65536;
+	humidity -= 6;
+
 	error = sysctl_handle_int(oidp, &humidity, 0, req);
 	if (error != 0 || req -> newptr == NULL) {
 		return error;
