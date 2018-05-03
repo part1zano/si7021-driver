@@ -182,10 +182,11 @@ static int si7021_humidity_sysctl(SYSCTL_HANDLER_ARGS) {
 	int humidity = 0;
 
 	// to be written
-	uint8_t buffer_tx[2];
+	uint8_t buffer_tx[1];
 	uint8_t buffer_rx[2];
-	buffer_tx = {SI_RH_NOMM, 0};
-	if (si7021_write(sc->sc_dev, sc->sc_addr, buffer_tx, 2) != 0) {
+	
+	buffer_tx = {SI_RH_NOMM};
+	if (si7021_write(sc->sc_dev, sc->sc_addr, buffer_tx, 1) != 0) {
 		device_printf(dev, "couldnt write to device\n");
 	}
 	
